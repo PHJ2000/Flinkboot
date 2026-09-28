@@ -61,7 +61,7 @@ Follow these 3 essential steps to get started with Flinkboot:
 ## Documentation & References
 
 > [!NOTE]
-> **Version-Specific Documentation**: The documentation on the `main` branch tracks the latest development version. If you are using a specific release of Flinkboot, please **switch to the corresponding Git tag** (e.g. [`v0.4.0-1.20`](https://github.com/Sekelenao/Flinkboot/releases)) to ensure the guides and API references match your exact version.
+> **Version-Specific Documentation**: The documentation on the `main` branch tracks the latest development version. If you are using a specific release of Flinkboot, please **switch to the corresponding Git tag** (e.g. [`v0.5.0-1.20`](https://github.com/Sekelenao/Flinkboot/releases)) to ensure the guides and API references match your exact version.
 
 * **[How-To Guides Index](howto/README.md)** — Step-by-step guides for configurations, connectors, POJO compliance, and testing.
 * **[Compatibility Matrix](COMPATIBILITY.md)** — Supported Apache Flink versions and Java (JDK) runtimes.

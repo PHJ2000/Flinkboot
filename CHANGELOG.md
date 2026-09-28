@@ -41,6 +41,8 @@ All notable user-facing changes to this project are documented in this file.
 - **[configuration] Local Web UI Port Range Validation (`@Range`)**: Enforces `@Range(min = 0, max = 65535)` on `LocalWebUiProperties.port`, allowing port `0` for dynamic ephemeral port allocation.
 - **[configuration] Local Web UI Mandatory Enablement (`@NotNull`)**: Enforces `@NotNull` on `LocalWebUiProperties.enabled` to reject YAML configurations that omit `enabled`.
 - **[configuration] Exhaustive Validation Diagnostics**: Configuration loading reports all missing and invalid fields simultaneously in a structured multi-line report instead of failing on the first missing field.
+- **[bom] RocksDB State Backend Dependency**: Added `org.apache.flink:flink-statebackend-rocksdb` (scope `provided`) to BOM `dependencyManagement` for managed state storage.
+- **[bom & flinkboot-fluss] Apache Fluss 1.0.0**: Upgraded Apache Fluss from `0.9.1-incubating` to official `1.0.0` release.
 
 ### 🔵 Fixes & Robustness
 - **[flinkboot-core] Typed Command Line Parsing Exception**: Throws `CommandLineParsingException` instead of `NoSuchElementException` when a CLI option is missing its required value.

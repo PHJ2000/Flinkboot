@@ -3,7 +3,7 @@
 This section contains step-by-step guides to help you implement specific features and configurations in Flinkboot.
 
 > [!NOTE]
-> **Version-Specific Guides**: These guides reflect the `main` branch (latest development state). If you are using a published version of Flinkboot, please **switch to your version's Git tag** (e.g. [`v0.4.0-1.20`](https://github.com/Sekelenao/Flinkboot/releases)) to ensure configuration keys and APIs match your dependencies.
+> **Version-Specific Guides**: These guides reflect the `main` branch (latest development state). If you are using a published version of Flinkboot, please **switch to your version's Git tag** (e.g. [`v0.5.0-1.20`](https://github.com/Sekelenao/Flinkboot/releases)) to ensure configuration keys and APIs match your dependencies.
 
 ## Project Setup & Packaging
 
@@ -34,7 +34,7 @@ This section contains step-by-step guides to help you implement specific feature
 ## Connectors: Apache Fluss
 
 - [How to Configure a Fluss Source](fluss/configure-fluss-source.md) — Configure and build an Apache Fluss Source with offset, timestamp, and snapshot strategies.
-- [How to Configure a Fluss Sink](fluss/configure-fluss-sink.md) — Configure and build an Apache Fluss Sink with batch size and timeout tuning.
+- [How to Configure a Fluss Sink](fluss/configure-fluss-sink.md) — Configure and build an Apache Fluss Sink with vendor client property tuning.
 
 ---
 

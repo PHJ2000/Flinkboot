@@ -7,6 +7,9 @@ Flinkboot
 </h1>
 
 > **The Bootstrapping & Reliability Framework for Apache Flink.** Fail fast on configuration, serialize natively without Kryo, and bootstrap stream pipelines with zero boilerplate.
+>
+> **Built by developers who felt the pain.**  
+> *We’ve lived through the midnight outages, fragile boilerplate, and endless configuration headaches so you don't have to. Flinkboot is our free, open-source gift to the Flink community, crafted with care to make stream processing enjoyable again.*
 
 [![Java](https://img.shields.io/badge/Java_11%2B-%23ED8B00.svg?logo=openjdk&logoColor=white)](https://docs.oracle.com/en/java/javase/11/docs/api/index.html)
 [![Flink](https://img.shields.io/badge/Flink_1.20-%23E6526F.svg?logo=apacheflink&logoColor=white)](https://flink.apache.org/)
@@ -22,9 +25,6 @@ Flinkboot
 **Flinkboot** is a comprehensive, production-grade development and reliability framework designed to bootstrap, configure, and secure Apache Flink applications with **zero boilerplate**.
 
 In standard Flink deployments, misconfigurations, missing parameters, state backend errors, and silent fallbacks to slow Kryo serialization often go unnoticed until runtime, leading to costly cluster failures or degraded pipeline throughput. Flinkboot eliminates these risks before your code ever reaches the TaskManagers:
-
-> **Built by developers who felt the pain.**  
-> *We’ve lived through the midnight outages, fragile boilerplate, and endless configuration headaches so you don't have to. Flinkboot is our free, open-source gift to the Flink community, crafted with care to make stream processing enjoyable again.*
 
 ### 🔴 Before
 

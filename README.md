@@ -23,10 +23,91 @@ Flinkboot
 
 In standard Flink deployments, misconfigurations, missing parameters, state backend errors, and silent fallbacks to slow Kryo serialization often go unnoticed until runtime—leading to costly cluster failures or degraded pipeline throughput. Flinkboot eliminates these risks before your code ever reaches the TaskManagers:
 
-* **Fail-Fast Startup & Multi-Source Configuration**: Unifies hierarchical YAML configurations, CLI arguments, and environment variables into immutable, validated Java records using Jakarta Bean Validation (JSR-380). Every parameter, numeric boundary, and regex is verified on the JobManager before resources are provisioned.
-* **High-Performance Native Serialization**: Built-in `@TypeInfo` factories and optimized serializers for Java 8 date/time types, collections (`List<E>`, `Map<K, V>`), and `Duration` (encoded in a compact 12-byte binary format) ensure pure native Flink serialization without slow Kryo fallback.
-* **Deep POJO Compliance Verification**: Unit testing utilities (`FlinkbootAssertions.assertThat(...).isPojo()`) recursively inspect entire data model hierarchies—including nested objects, generics, collections, arrays, tuples, and `Either` types—guaranteeing 100% native Flink serialization compliance at build time.
-* **Declarative Execution & Pre-Built Connectors**: Bootstrap Flink's `StreamExecutionEnvironment` (checkpointing, RocksDB state backends, restart strategies, savepoints, Web UI) and production-ready connectors (e.g. Apache Kafka, Apache Fluss sources/sinks) with a single method call.
+### 🔴 Before: Standard Apache Flink (Fragile & Imperative Boilerplate)
+
+* **No YAML or hierarchical config support**: `ParameterTool` only handles flat key-value CLI args or `.properties` files—forcing teams to handcraft custom Jackson/SnakeYAML parsers and battle Flink classpath shading conflicts.
+* **No environment variable interpolation**: Manual fallback wiring (`params.get("key", System.getenv("VAR"))`) with zero fail-fast safety.
+* **No startup validation**: Missing variables, syntax errors, or invalid ranges crash TaskManagers minutes into execution.
+* **Repetitive manual environment plumbing**: 30+ lines of imperative setup for checkpointing, RocksDB state backends, and connectors.
+
+```java
+public static void main(String[] args) throws Exception {
+    ParameterTool params = ParameterTool.fromArgs(args);
+
+    // Manual parsing & fallback wiring (runtime NPE hazards)
+    String brokers = params.get("bootstrap.servers", System.getenv("KAFKA_BROKERS"));
+    if (brokers == null) {
+        throw new IllegalArgumentException("Missing kafka brokers");
+    }
+    long checkpointInterval = params.getLong("checkpoint.interval", 10000L);
+
+    // Manual imperative environment setup
+    StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
+    env.enableCheckpointing(checkpointInterval);
+    env.getCheckpointConfig().setCheckpointTimeout(60000L);
+    env.getCheckpointConfig().setMinPauseBetweenCheckpoints(5000L);
+    env.setStateBackend(new EmbeddedRocksDBStateBackend(true));
+    env.setRestartStrategy(RestartStrategies.fixedDelayRestart(3, Time.seconds(10)));
+
+    // Manual connector builder
+    KafkaSource<String> source = KafkaSource.<String>builder()
+            .setBootstrapServers(brokers)
+            .setTopics(params.getRequired("topic"))
+            .setGroupId(params.get("group.id", "default-group"))
+            .setStartingOffsets(OffsetsInitializer.latest())
+            .setValueOnlyDeserializer(new SimpleStringSchema())
+            .build();
+
+    env.fromSource(source, WatermarkStrategy.noWatermarks(), "kafka-source").print();
+    env.execute("LegacyJob");
+}
+```
+
+---
+
+### 🟢 After: With Flinkboot (Declarative, Validated & Fail-Fast)
+
+* Seamless multi-source loading: **YAML + Environment variables (`${...}`) + CLI overrides**.
+* **Comprehensive fail-fast validation** via Jakarta Bean Validation (reports all misconfigurations at once before allocating resources).
+* Single-line declarative bootstrapping for execution environments and connectors.
+
+```java
+// User-defined composed configuration
+public record AppConfiguration(
+    @Valid @NotNull @JsonProperty("job") JobProperties job,                       // Provided by flinkboot-core
+    @Valid @NotNull @JsonProperty("kafka-source") KafkaSourceProperties kafkaSource   // Provided by flinkboot-kafka
+) {}
+
+public class MyFlinkJob {
+
+    public static void main(String[] args) throws Exception {
+        // 1. Parse, merge (YAML + Env + CLI) & validate fail-fast in one line
+        AppConfiguration config = Flinkboot.initialize(args).configuration(AppConfiguration.class);
+
+        // 2. Instantiate fully tuned environment (RocksDB, Checkpointing, Restart Strategy)
+        StreamExecutionEnvironment env = Flinkboot.executionEnvironment(config.job().environment());
+
+        // 3. Pre-configured, production-ready Kafka source
+        KafkaSource<String> source = KafkaSourceFactory.supplyFor(config.kafkaSource(), new SimpleStringSchema());
+
+        env.fromSource(source, WatermarkStrategy.noWatermarks(), config.kafkaSource().name()).print();
+        env.execute(config.job().name());
+    }
+}
+```
+
+---
+
+## Key Capabilities
+
+* **Unified Configuration Loading** — Parse and merge multiple YAML files, CLI arguments, and environment variables into immutable Java records.
+* **Fail-Fast Validation** — Catch missing parameters, invalid ranges, and syntax errors on the JobManager before resources are allocated.
+* **Declarative Execution Environment** — Configure and instantiate Flink's `StreamExecutionEnvironment` with zero boilerplate.
+* **Native JDK Type Serialization** — Built-in `@TypeInfo` factories for `Duration`, Java 8 time types, and generic collections without Kryo fallback.
+* **Deep POJO Compliance Verification** — Test utility (`FlinkbootAssertions.assertThat(...).isPojo()`) to recursively verify that data models serialize natively without Kryo.
+* **Testing Helpers** — Load and validate configurations directly in JUnit 5 tests.
+* **Unified Resource Loading** — Load files and assets seamlessly across classpath and file systems with a unified URI syntax (`Resource.of`).
+* **Auto-configured Connectors** — Production-ready sources and sinks (e.g. Apache Kafka, Apache Fluss) built directly from configuration.
 
 ---
 
@@ -42,19 +123,6 @@ Follow these 3 essential steps to get started with Flinkboot:
 
 3. **[Create an Execution Environment](howto/configuration/configure-execution-environment.md)**  
    *Configure execution modes, checkpointing, restart strategies, and RocksDB state backends to instantiate Flink's `StreamExecutionEnvironment` with zero boilerplate.*
-
----
-
-## Key Capabilities
-
-* **Unified Configuration Loading** — Parse and merge multiple YAML files, CLI arguments, and environment variables into immutable Java records.
-* **Fail-Fast Validation** — Catch missing parameters, invalid ranges, and syntax errors on the JobManager before resources are allocated.
-* **Declarative Execution Environment** — Configure and instantiate Flink's `StreamExecutionEnvironment` with zero boilerplate.
-* **Native JDK Type Serialization** — Built-in `@TypeInfo` factories for `Duration`, Java 8 time types, and generic collections without Kryo fallback.
-* **Deep POJO Compliance Verification** — Test utility (`FlinkbootAssertions.assertThat(...).isPojo()`) to recursively verify that data models serialize natively without Kryo.
-* **Testing Helpers** — Load and validate configurations directly in JUnit 5 tests.
-* **Unified Resource Loading** — Load files and assets seamlessly across classpath and file systems with a unified URI syntax (`Resource.of`).
-* **Auto-configured Connectors** — Production-ready sources and sinks (e.g. Apache Kafka, Apache Fluss) built directly from configuration.
 
 ---
 

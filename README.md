@@ -21,74 +21,80 @@ Flinkboot
 
 **Flinkboot** is a comprehensive, production-grade development and reliability framework designed to bootstrap, configure, and secure Apache Flink applications with **zero boilerplate**.
 
-In standard Flink deployments, misconfigurations, missing parameters, state backend errors, and silent fallbacks to slow Kryo serialization often go unnoticed until runtime—leading to costly cluster failures or degraded pipeline throughput. Flinkboot eliminates these risks before your code ever reaches the TaskManagers:
+In standard Flink deployments, misconfigurations, missing parameters, state backend errors, and silent fallbacks to slow Kryo serialization often go unnoticed until runtime, leading to costly cluster failures or degraded pipeline throughput. Flinkboot eliminates these risks before your code ever reaches the TaskManagers:
 
-### 🔴 Before: Standard Apache Flink (Fragile & Imperative Boilerplate)
+> **Built by developers who felt the pain.**  
+> *We’ve lived through the midnight outages, fragile boilerplate, and endless configuration headaches so you don't have to. Flinkboot is our free, open-source gift to the Flink community, crafted with care to make stream processing enjoyable again.*
 
-* **No YAML or hierarchical config support**: `ParameterTool` only handles flat key-value CLI args or `.properties` files—forcing teams to handcraft custom Jackson/SnakeYAML parsers and battle Flink classpath shading conflicts.
-* **No environment variable interpolation**: Manual fallback wiring (`params.get("key", System.getenv("VAR"))`) with zero fail-fast safety.
-* **No startup validation**: Missing variables, syntax errors, or invalid ranges crash TaskManagers minutes into execution.
-* **Repetitive manual environment plumbing**: 30+ lines of imperative setup for checkpointing, RocksDB state backends, and connectors.
+### 🔴 Before
 
 ```java
 public static void main(String[] args) throws Exception {
-    ParameterTool params = ParameterTool.fromArgs(args);
+    // 1. Manual YAML parsing with Jackson (untyped tree navigation, zero validation, fails on first missing key)
+    ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
+    JsonNode yaml = mapper.readTree(new File("job-configuration.yaml"));
+    String brokers = yaml.get("kafka").get("brokers").asText();
+    String topic = yaml.get("kafka").get("topic").asText();
+    long checkpointInterval = yaml.get("checkpoint").get("interval").asLong();
 
-    // Manual parsing & fallback wiring (runtime NPE hazards)
-    String brokers = params.get("bootstrap.servers", System.getenv("KAFKA_BROKERS"));
-    if (brokers == null) {
-        throw new IllegalArgumentException("Missing kafka brokers");
-    }
-    long checkpointInterval = params.getLong("checkpoint.interval", 10000L);
-
-    // Manual imperative environment setup
+    // 2. Imperative environment setup (hardcoded: adding Web UI, latency tracking, or unaligned checkpoints requires code change & redeployment)
     StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
     env.enableCheckpointing(checkpointInterval);
     env.getCheckpointConfig().setCheckpointTimeout(60000L);
-    env.getCheckpointConfig().setMinPauseBetweenCheckpoints(5000L);
     env.setStateBackend(new EmbeddedRocksDBStateBackend(true));
     env.setRestartStrategy(RestartStrategies.fixedDelayRestart(3, Time.seconds(10)));
 
-    // Manual connector builder
-    KafkaSource<String> source = KafkaSource.<String>builder()
+    // 3. Rigid manual connector builder (unverified OrderEvent could silently fall back to slow Kryo)
+    KafkaSource<OrderEvent> source = KafkaSource.<OrderEvent>builder()
             .setBootstrapServers(brokers)
-            .setTopics(params.getRequired("topic"))
-            .setGroupId(params.get("group.id", "default-group"))
+            .setTopics(topic)
+            .setGroupId("order-service")
             .setStartingOffsets(OffsetsInitializer.latest())
-            .setValueOnlyDeserializer(new SimpleStringSchema())
+            .setDeserializer(new OrderEventDeserializationSchema())
             .build();
 
     env.fromSource(source, WatermarkStrategy.noWatermarks(), "kafka-source").print();
     env.execute("LegacyJob");
+
+    // ... and it would take 400+ lines of imperative boilerplate just to cover all execution environment settings
+    // (RocksDB tuning, restart strategies, unaligned checkpoints, latency metrics, savepoint restore, local web UI...)
+    // Not to mention hundreds more for multi-source YAML merging, ${ENV} interpolation, and fail-fast validation.
 }
 ```
 
----
-
-### 🟢 After: With Flinkboot (Declarative, Validated & Fail-Fast)
-
-* Seamless multi-source loading: **YAML + Environment variables (`${...}`) + CLI overrides**.
-* **Comprehensive fail-fast validation** via Jakarta Bean Validation (reports all misconfigurations at once before allocating resources).
-* Single-line declarative bootstrapping for execution environments and connectors.
+### 🟢 With Flinkboot
 
 ```java
-// User-defined composed configuration
+// 1. Build-time guarantee in unit tests: fails build if OrderEvent could fall back to slow Kryo
+@Test
+void verifyPojoCompliance() {
+    FlinkbootAssertions.assertThat(OrderEvent.class).isPojo();
+}
+
+// 2. User-defined composed configuration (record or class): assemble independent blocks like Legos
 public record AppConfiguration(
-    @Valid @NotNull @JsonProperty("job") JobProperties job,                       // Provided by flinkboot-core
-    @Valid @NotNull @JsonProperty("kafka-source") KafkaSourceProperties kafkaSource   // Provided by flinkboot-kafka
+    // 100% validated fail-fast & covers every Flink environment setting (RocksDB, restart, checkpoints...)
+    @Valid @NotNull @JsonProperty("job") JobProperties job,
+
+    // 100% validated fail-fast & exhaustively covers the connector options with raw escape hatch
+    @Valid @NotNull @JsonProperty("kafka-source") KafkaSourceProperties kafkaSource
 ) {}
 
 public class MyFlinkJob {
 
     public static void main(String[] args) throws Exception {
-        // 1. Parse, merge (YAML + Env + CLI) & validate fail-fast in one line
-        AppConfiguration config = Flinkboot.initialize(args).configuration(AppConfiguration.class);
+        // Loads & merges multi-source YAML with full fail-fast Jakarta validation (catches all errors at once)
+        Flinkboot boot = Flinkboot.initialize(args);
+        AppConfiguration config = boot.configuration(AppConfiguration.class);
 
-        // 2. Instantiate fully tuned environment (RocksDB, Checkpointing, Restart Strategy)
-        StreamExecutionEnvironment env = Flinkboot.executionEnvironment(config.job().environment());
+        // 1-line setup fully configuring RocksDB, checkpointing, restart strategy, local Web UI, and latency tracking
+        StreamExecutionEnvironment env = boot.executionEnvironment(config.job());
 
-        // 3. Pre-configured, production-ready Kafka source
-        KafkaSource<String> source = KafkaSourceFactory.supplyFor(config.kafkaSource(), new SimpleStringSchema());
+        // Pre-configured, production-ready Kafka source with operator-level properties escape hatch
+        KafkaSource<OrderEvent> source = KafkaSourceFactory.supplyFor(
+            config.kafkaSource(), 
+            new OrderEventDeserializationSchema()
+        );
 
         env.fromSource(source, WatermarkStrategy.noWatermarks(), config.kafkaSource().name()).print();
         env.execute(config.job().name());

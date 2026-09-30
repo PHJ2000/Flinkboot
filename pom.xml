@@ -77,7 +77,7 @@
         <plugin.maven.source.version>3.4.0</plugin.maven.source.version>
         <plugin.maven.gpg.version>3.2.8</plugin.maven.gpg.version>
         <plugin.maven.central.publishing.version>0.11.0</plugin.maven.central.publishing.version>
-        <plugin.spotless.version>2.44.0</plugin.spotless.version>
+        <plugin.spotless.version>2.46.1</plugin.spotless.version>
 
         <!-- Project configs -->
         <maven.compiler.release>${java.version}</maven.compiler.release>

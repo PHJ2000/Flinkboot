@@ -20,7 +20,7 @@ public final class StartupEnvironment {
     private final CommandLine commandLine;
 
     private final EnvVarResolver envVarResolver;
-    
+
     public StartupEnvironment(String[] args){
         Objects.requireNonNull(args);
         this.commandLine = CommandLine.parse(args);

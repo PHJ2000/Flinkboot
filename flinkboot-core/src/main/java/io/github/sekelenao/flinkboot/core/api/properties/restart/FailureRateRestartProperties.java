@@ -104,4 +104,3 @@ public final class FailureRateRestartProperties implements Serializable {
             '}';
     }
 }
-

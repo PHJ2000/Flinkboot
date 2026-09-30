@@ -42,7 +42,7 @@ class KafkaSinkPropertiesValidatorTest {
     @Nested
     @DisplayName("Validation")
     class Validation {
-        
+
         @Test
         @DisplayName("Should throw NullPointerException when properties is null")
         void shouldThrowWhenPropertiesIsNull() {

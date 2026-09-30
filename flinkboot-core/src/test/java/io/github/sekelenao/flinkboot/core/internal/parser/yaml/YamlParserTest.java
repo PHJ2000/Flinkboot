@@ -710,7 +710,7 @@ class YamlParserTest {
                 assertAll(
                     () -> assertNotNull(config),
                     () -> assertEquals("prod", config.env()),
-                    
+
                     // Verify nested database object
                     () -> assertNotNull(config.database()),
                     () -> assertEquals("db-prod", config.database().host()),
@@ -723,7 +723,7 @@ class YamlParserTest {
                     () -> assertEquals("replica1", config.replicas().get(0).host()),
                     () -> assertEquals(5433, config.replicas().get(0).port()),
                     () -> assertEquals(List.of("readOnly=true"), config.replicas().get(0).options()),
-                    
+
                     // Verify replica2 was merged/appended
                     () -> assertEquals("replica2", config.replicas().get(1).host()),
                     () -> assertEquals(5434, config.replicas().get(1).port()),

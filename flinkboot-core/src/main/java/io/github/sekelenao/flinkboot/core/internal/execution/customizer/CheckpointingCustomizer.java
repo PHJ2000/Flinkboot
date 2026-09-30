@@ -77,4 +77,3 @@ public final class CheckpointingCustomizer implements EnvironmentCustomizer {
         toConfigure.set(CheckpointingOptions.CHECKPOINTS_DIRECTORY, storageUri);
     }
 }
-

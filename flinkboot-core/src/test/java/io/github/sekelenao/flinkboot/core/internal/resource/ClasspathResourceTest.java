@@ -46,7 +46,7 @@ class ClasspathResourceTest {
 
             var path = "io/github/sekelenao/flinkboot/core/internal/resource/ClasspathResourceTest.class";
             var resource = new ClasspathResource(path);
-            
+
             try (var is = resource.inputStream()) {
                 assertNotNull(is);
                 assertTrue(is.readAllBytes().length > 0);

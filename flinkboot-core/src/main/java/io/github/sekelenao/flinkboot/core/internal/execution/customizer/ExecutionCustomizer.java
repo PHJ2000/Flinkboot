@@ -60,4 +60,3 @@ public final class ExecutionCustomizer implements EnvironmentCustomizer {
         toConfigure.set(PipelineOptions.OBJECT_REUSE, objectReuse);
     }
 }
-

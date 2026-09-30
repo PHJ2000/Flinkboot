@@ -149,4 +149,3 @@ public final class ExponentialDelayRestartProperties implements Serializable {
             '}';
     }
 }
-

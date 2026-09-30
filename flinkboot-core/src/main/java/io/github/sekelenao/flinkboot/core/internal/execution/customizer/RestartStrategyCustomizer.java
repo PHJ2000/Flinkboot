@@ -111,4 +111,3 @@ public final class RestartStrategyCustomizer implements EnvironmentCustomizer {
         toConfigure.set(RestartStrategyOptions.RESTART_STRATEGY_EXPONENTIAL_DELAY_JITTER_FACTOR, jitterFactor);
     }
 }
-

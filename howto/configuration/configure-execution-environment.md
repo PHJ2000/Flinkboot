@@ -93,14 +93,14 @@ environment:
 
 ## 2. Configuration Parameters Reference
 
-### Job Level (`JobProperties`)
+### Job Configuration (`JobProperties`)
 
 | Property Key  | Type   | Required | Description                                                        |
 |:--------------|:-------|:---------|:-------------------------------------------------------------------|
 | `name`        | String | **Yes**  | Canonical job name registered with Flink (`PipelineOptions.NAME`). |
 | `environment` | Object | No       | Execution environment settings (`ExecutionEnvironmentProperties`). |
 
-### Execution Settings (`ExecutionProperties`)
+### Execution (`execution:`) — `ExecutionProperties` *(Optional)*
 
 | Property Key              | Type       | Required | Validation                  | Description                                                                                           |
 |:--------------------------|:-----------|:---------|:----------------------------|:------------------------------------------------------------------------------------------------------|
@@ -111,7 +111,7 @@ environment:
 | `auto-watermark-interval` | `Duration` | No       | `@DurationMin(millis = 0)`  | Periodic watermark emission interval (`PipelineOptions.AUTO_WATERMARK_INTERVAL`), e.g. `"PT0.2S"`.    |
 | `object-reuse`            | Boolean    | No       | Boolean                     | Enable object reuse optimization (`PipelineOptions.OBJECT_REUSE`). Defaults to false in Flink.        |
 
-### Checkpointing Settings (`CheckpointingProperties`)
+### Checkpointing (`checkpointing:`) — `CheckpointingProperties` *(Optional)*
 
 | Property Key                      | Type       | Required | Validation                  | Description                                                                                                                   |
 |:----------------------------------|:-----------|:---------|:----------------------------|:------------------------------------------------------------------------------------------------------------------------------|
@@ -126,7 +126,7 @@ environment:
 | `aligned-checkpoint-timeout`      | `Duration` | No       | `@DurationMin(millis = 0)`  | Timeout before switching to unaligned checkpoints (`CheckpointingOptions.ALIGNED_CHECKPOINT_TIMEOUT`), e.g. `"PT1S"`.         |
 | `storage-uri`                     | String     | No       | String                      | Target checkpoint storage directory URI, e.g. `s3://bucket/checkpoints` (`CheckpointingOptions.CHECKPOINTS_DIRECTORY`).       |
 
-### Restart Strategy Settings (`RestartStrategyProperties`)
+### Restart Strategy (`restart-strategy:`) — `RestartStrategyProperties` *(Optional)*
 
 The `restart-strategy` block accepts a `type` property (`NO_RESTART`, `FIXED_DELAY`, `FAILURE_RATE`, `EXPONENTIAL_DELAY`, `FALLBACK`) and at most **one** matching sub-configuration block.
 
@@ -168,7 +168,7 @@ The `restart-strategy` block accepts a `type` property (`NO_RESTART`, `FIXED_DEL
 | `jitter-factor`           | Double     | No       | `@DecimalMin("0.0")`, `@DecimalMax("1.0")` | Jitter factor for delay randomization (`RestartStrategyOptions.RESTART_STRATEGY_EXPONENTIAL_DELAY_JITTER_FACTOR`).      |
 
 
-### State Backend Settings (`StateBackendProperties`)
+### State Backend (`state-backend:`) — `StateBackendProperties` *(Optional)*
 
 | Property Key         | Type    | Required                      | Validation | Description                                                                                                              |
 |:---------------------|:--------|:------------------------------|:-----------|:-------------------------------------------------------------------------------------------------------------------------|
@@ -178,7 +178,7 @@ The `restart-strategy` block accepts a `type` property (`NO_RESTART`, `FIXED_DEL
 | `latency-tracking`   | Boolean | No                            | Boolean    | Enable latency tracking metrics for state access (`StateBackendOptions.LATENCY_TRACK_ENABLED`).                          |
 | `custom-class`       | String  | **Yes** (if `type == CUSTOM`) | String     | Fully qualified class name for custom state backend. Allowed **only** when `type: CUSTOM`.                               |
 
-### Savepoint Restore Settings (`SavepointRestoreProperties`)
+### Savepoint Restore (`savepoint-restore:`) — `SavepointRestoreProperties` *(Optional)*
 
 | Property Key               | Type    | Required | Validation  | Description                                                                                                                           |
 |:---------------------------|:--------|:---------|:------------|:--------------------------------------------------------------------------------------------------------------------------------------|
@@ -186,7 +186,7 @@ The `restart-strategy` block accepts a `type` property (`NO_RESTART`, `FIXED_DEL
 | `allow-non-restored-state` | Boolean | No       | Boolean     | Allow job to start even if state contains subtasks that cannot be restored (`StateRecoveryOptions.SAVEPOINT_IGNORE_UNCLAIMED_STATE`). |
 | `restore-mode`             | Enum    | No       | Enum        | Savepoint restore mode: `CLAIM`, `NO_CLAIM`, or `LEGACY` (`StateRecoveryOptions.RESTORE_MODE`).                                       |
 
-### Local Dev WebUI Settings (`LocalWebUiProperties`)
+### Local Dev WebUI (`local-web-ui:`) — `LocalWebUiProperties` *(Optional)*
 
 | Property Key   | Type    | Required | Validation  | Description                                                                                                                           |
 |:---------------|:--------|:---------|:------------|:--------------------------------------------------------------------------------------------------------------------------------------|
@@ -194,7 +194,7 @@ The `restart-strategy` block accepts a `type` property (`NO_RESTART`, `FIXED_DEL
 | `port`         | Integer | No       | `@Positive` | Port for local WebUI REST server (`RestOptions.PORT`). Defaults to 8081 in Flink. Applied **only** when `enabled: true`.              |
 | `bind-address` | String  | No       | String      | Local WebUI REST server bind address (`RestOptions.BIND_ADDRESS`). Defaults to `localhost`. Applied **only** when `enabled: true`.    |
 
-### Escape-Hatch Custom Properties (`properties`)
+### Escape-Hatch Custom Properties (`properties:`) *(Optional)*
 
 Arbitrary Flink configuration key-value pairs (`Map<String, String>`) applied directly onto Flink's native `Configuration` object. Keys and values must be non-null:
 

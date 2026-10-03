@@ -66,3 +66,8 @@ All audit subagents (including `module-scanner` and `pr-reviewer`) must consult 
 - **Status**: **REJECTED**
 - **Rationale**: `CollectingSink` implements `AutoCloseable`, guaranteeing scoped cleanup via `try-with-resources` or `@AfterEach`. Each sink uses a unique `UUID` specifically to ensure complete data isolation during concurrent/parallel test runs (`junit.jupiter.execution.parallel.enabled=true`). A global static `clearAll()` would introduce cross-test interference, destroy test isolation in parallel suites, expand public API surface unnecessarily, and encourage sloppy lifecycle management.
 
+## 13. Mutable Configuration in Single-Use ExecutionEnvironmentFactory
+- **Pattern**: Flagging instance `Configuration` or customizer lists in `ExecutionEnvironmentFactory` as a thread-safety or state accumulation hazard.
+- **Status**: **REJECTED**
+- **Rationale**: `ExecutionEnvironmentFactory` is an internal machinery class instantiated fresh on every invocation (`new ExecutionEnvironmentFactory().create(jobProperties)` in `Flinkboot.java`). It is never reused across multiple invocations, stored in static state, or shared across threads. Forcing it to be stateless by passing configuration across internal methods adds ceremony with zero practical reliability gain, directly adhering to Rule 1 (*Single-Use Internal Processor State*).
+

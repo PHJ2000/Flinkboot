@@ -70,10 +70,13 @@ A connector or factory that does not faithfully configure the underlying engine 
    - Mutable static state or caches accessed concurrently without synchronization across TaskManagers or threads.
    - Non-thread-safe utilities (formatters, date parsers, collections) shared across tasks.
 
-6. **Validation Barrier & Immutability**:
-   - Leftover `Objects.requireNonNull(...)` or manual validation in Jackson `@JsonCreator` constructors that mask multi-line Jakarta Bean Validation diagnostics.
-   - Missing Bean Validation constraints on critical configuration fields allowing corrupt state into runtime.
-   - Leaking raw mutable collections or maps from DTO accessors instead of returning defensive unmodifiable views (`Collections.unmodifiableList(...)`, `Collections.unmodifiableMap(...)`).
+6. **Validation Barrier, Cross-Field Safety & Immutability**:
+   - **No Legitimate Blocking (Over-Validation)**: Ensure validators never reject configuration combinations that are technically valid, intended, or natively supported by the underlying Apache Flink engine.
+   - **Cross-Field Null Isolation (Cascaded Validation Defect)**: In all `*PropertiesValidator` classes, verify that cross-field checks never evaluate or fail against `null` prerequisite fields (strictly enforce Rule 9 of `refused_past_issues.md`). Missing fields are the exclusive responsibility of single-field `@NotNull`/`@NotBlank` annotations. A validator must return `true` or skip checks when a required prerequisite is null to prevent misleading cascaded errors.
+   - **Exhaustive Interdependency Fail-Fast (Under-Validation)**: Verify that all mutually exclusive, conditional, or interdependent settings are rigorously validated before topology construction. Contradictory, missing, or ambiguous states must never slip past the validation barrier into runtime factories.
+   - **Diagnostic Precision**: Verify that every `PropertiesValidator.reject(...)` attaches the violation to the exact property name matching the YAML schema, with an actionable, non-misleading error message.
+   - **Constructor Cleanliness**: Detect leftover `Objects.requireNonNull(...)` or manual validation in Jackson `@JsonCreator` constructors that mask multi-line Jakarta Bean Validation diagnostics.
+   - **Defensive Immutability**: Ensure DTO accessors return defensive unmodifiable views (`Collections.unmodifiableList(...)`, `Collections.unmodifiableMap(...)`) rather than leaking raw mutable collections or maps.
 
 ---
 

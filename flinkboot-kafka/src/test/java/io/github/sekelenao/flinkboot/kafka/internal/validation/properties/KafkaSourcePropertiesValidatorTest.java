@@ -4,7 +4,6 @@ import io.github.sekelenao.flinkboot.kafka.api.properties.source.KafkaBoundednes
 import io.github.sekelenao.flinkboot.kafka.api.properties.source.KafkaOffsetInitializer;
 import io.github.sekelenao.flinkboot.kafka.api.properties.source.KafkaOffsetProperties;
 import io.github.sekelenao.flinkboot.kafka.api.properties.source.KafkaSourceProperties;
-import io.github.sekelenao.flinkboot.kafka.internal.properties.validation.KafkaSourcePropertiesValidator;
 import jakarta.validation.ConstraintValidatorContext;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;

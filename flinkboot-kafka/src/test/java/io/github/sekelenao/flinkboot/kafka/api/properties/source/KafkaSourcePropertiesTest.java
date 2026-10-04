@@ -247,6 +247,29 @@ class KafkaSourcePropertiesTest {
             );
         }
 
+        @ParameterizedTest
+        @ValueSource(strings = {"", "   ", "\t\n"})
+        @DisplayName("Should fail validation when topicPattern is blank")
+        void shouldFailWhenTopicPatternIsBlank(String blankPattern) {
+            var config = new KafkaSourceProperties(
+                "my-source",
+                List.of("localhost:9092"),
+                "my-group",
+                null,
+                blankPattern,
+                DEFAULT_STARTING_OFFSETS,
+                null,
+                null,
+                null
+            );
+            var violations = validator.validate(config);
+
+            assertAll(
+                () -> assertFalse(violations.isEmpty()),
+                () -> assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().equals("topicPattern")))
+            );
+        }
+
         @Test
         @DisplayName("Should fail validation when both topics and topic-pattern are configured")
         void shouldFailWhenBothTopicsAndTopicPatternSpecified() {
@@ -513,7 +536,7 @@ class KafkaSourcePropertiesTest {
             var diffServers = new KafkaSourceProperties("source", List.of("localhost:9093"), "group", List.of("topic"), null, DEFAULT_STARTING_OFFSETS, KafkaBoundedness.BOUNDED, DEFAULT_STOPPING_OFFSETS, Map.of("k", "v"));
             var diffGroup = new KafkaSourceProperties("source", List.of("localhost:9092"), "other-group", List.of("topic"), null, DEFAULT_STARTING_OFFSETS, KafkaBoundedness.BOUNDED, DEFAULT_STOPPING_OFFSETS, Map.of("k", "v"));
             var diffTopics = new KafkaSourceProperties("source", List.of("localhost:9092"), "group", List.of("other-topic"), null, DEFAULT_STARTING_OFFSETS, KafkaBoundedness.BOUNDED, DEFAULT_STOPPING_OFFSETS, Map.of("k", "v"));
-            var diffPattern = new KafkaSourceProperties("source", List.of("localhost:9092"), "group", null, "^topic.*", DEFAULT_STARTING_OFFSETS, KafkaBoundedness.BOUNDED, DEFAULT_STOPPING_OFFSETS, Map.of("k", "v"));
+            var diffPattern = new KafkaSourceProperties("source", List.of("localhost:9092"), "group", List.of("topic"), "^topic.*", DEFAULT_STARTING_OFFSETS, KafkaBoundedness.BOUNDED, DEFAULT_STOPPING_OFFSETS, Map.of("k", "v"));
             var diffStart = new KafkaSourceProperties("source", List.of("localhost:9092"), "group", List.of("topic"), null, new KafkaOffsetProperties(KafkaOffsetInitializer.LATEST, null, null), KafkaBoundedness.BOUNDED, DEFAULT_STOPPING_OFFSETS, Map.of("k", "v"));
             var diffBoundedness = new KafkaSourceProperties("source", List.of("localhost:9092"), "group", List.of("topic"), null, DEFAULT_STARTING_OFFSETS, KafkaBoundedness.UNBOUNDED, DEFAULT_STOPPING_OFFSETS, Map.of("k", "v"));
             var diffStop = new KafkaSourceProperties("source", List.of("localhost:9092"), "group", List.of("topic"), null, DEFAULT_STARTING_OFFSETS, KafkaBoundedness.BOUNDED, new KafkaOffsetProperties(KafkaOffsetInitializer.COMMITTED, null, null), Map.of("k", "v"));

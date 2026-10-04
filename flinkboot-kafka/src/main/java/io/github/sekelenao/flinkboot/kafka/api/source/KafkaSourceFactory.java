@@ -2,7 +2,7 @@ package io.github.sekelenao.flinkboot.kafka.api.source;
 
 import io.github.sekelenao.flinkboot.kafka.api.properties.source.KafkaBoundedness;
 import io.github.sekelenao.flinkboot.kafka.api.properties.source.KafkaSourceProperties;
-import io.github.sekelenao.flinkboot.kafka.internal.properties.OffsetInitializerMapper;
+import io.github.sekelenao.flinkboot.kafka.internal.OffsetInitializerMapper;
 import org.apache.flink.connector.kafka.source.KafkaSource;
 import org.apache.flink.connector.kafka.source.KafkaSourceBuilder;
 import org.apache.flink.connector.kafka.source.reader.deserializer.KafkaRecordDeserializationSchema;

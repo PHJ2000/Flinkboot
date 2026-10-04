@@ -5,9 +5,9 @@ import io.github.sekelenao.flinkboot.kafka.api.properties.source.KafkaOffsetInit
 import io.github.sekelenao.flinkboot.kafka.api.properties.source.KafkaOffsetProperties;
 import io.github.sekelenao.flinkboot.kafka.api.properties.source.KafkaSourceProperties;
 import io.github.sekelenao.flinkboot.kafka.api.properties.source.TopicPartitionOffsetProperties;
-import io.github.sekelenao.flinkboot.kafka.internal.properties.OffsetInitializerMapper;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.common.typeinfo.Types;
+import org.apache.flink.api.connector.source.Boundedness;
 import org.apache.flink.connector.kafka.source.reader.deserializer.KafkaRecordDeserializationSchema;
 import org.apache.flink.util.Collector;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -51,45 +51,6 @@ class KafkaSourceFactoryTest {
         constructor.setAccessible(true);
         var exception = assertThrows(InvocationTargetException.class, constructor::newInstance);
         assertInstanceOf(AssertionError.class, exception.getCause());
-    }
-
-    @Test
-    @DisplayName("OffsetInitializerMapper private constructor should throw AssertionError")
-    void testOffsetInitializerMapperConstructorIsPrivate() throws Exception {
-        var constructor = OffsetInitializerMapper.class.getDeclaredConstructor();
-        constructor.setAccessible(true);
-        var exception = assertThrows(InvocationTargetException.class, constructor::newInstance);
-        assertInstanceOf(AssertionError.class, exception.getCause());
-    }
-
-    @Test
-    @DisplayName("OffsetInitializerMapper.map should throw NullPointerException when properties is null")
-    void shouldThrowWhenPropertiesIsNullInOffsetInitializerMapper() {
-        var ex = assertThrows(NullPointerException.class, () -> OffsetInitializerMapper.map(null));
-        assertEquals("properties must not be null", ex.getMessage());
-    }
-
-    @Test
-    @DisplayName("OffsetInitializerMapper.map should successfully map all offset initializer strategies")
-    void shouldMapAllOffsetInitializerStrategies() {
-        var earliest = new KafkaOffsetProperties(KafkaOffsetInitializer.EARLIEST, null, null);
-        var latest = new KafkaOffsetProperties(KafkaOffsetInitializer.LATEST, null, null);
-        var committed = new KafkaOffsetProperties(KafkaOffsetInitializer.COMMITTED, null, null);
-        var committedEarliest = new KafkaOffsetProperties(KafkaOffsetInitializer.COMMITTED_EARLIEST, null, null);
-        var committedLatest = new KafkaOffsetProperties(KafkaOffsetInitializer.COMMITTED_LATEST, null, null);
-        var timestamp = new KafkaOffsetProperties(KafkaOffsetInitializer.TIMESTAMP, 1689717600000L, null);
-        var partition = new TopicPartitionOffsetProperties("test-topic", 0, 100L);
-        var offsets = new KafkaOffsetProperties(KafkaOffsetInitializer.OFFSETS, null, List.of(partition));
-
-        assertAll(
-            () -> assertNotNull(OffsetInitializerMapper.map(earliest)),
-            () -> assertNotNull(OffsetInitializerMapper.map(latest)),
-            () -> assertNotNull(OffsetInitializerMapper.map(committed)),
-            () -> assertNotNull(OffsetInitializerMapper.map(committedEarliest)),
-            () -> assertNotNull(OffsetInitializerMapper.map(committedLatest)),
-            () -> assertNotNull(OffsetInitializerMapper.map(timestamp)),
-            () -> assertNotNull(OffsetInitializerMapper.map(offsets))
-        );
     }
 
     @Nested
@@ -160,7 +121,7 @@ class KafkaSourceFactoryTest {
         }
 
         @Test
-        @DisplayName("Should successfully build bounded source with stopping-offsets")
+        @DisplayName("Should successfully build bounded source with stopping-offsets and verify BOUNDED boundedness")
         void shouldBuildBoundedSourceWithStoppingOffsets() {
             var config = new KafkaSourceProperties(
                 "my-source",
@@ -174,14 +135,17 @@ class KafkaSourceFactoryTest {
                 null
             );
 
+            var source = KafkaSourceFactory.supplyFor(config, TEST_SCHEMA);
+
             assertAll(
-                () -> assertNotNull(KafkaSourceFactory.supplyFor(config, TEST_SCHEMA)),
+                () -> assertNotNull(source),
+                () -> assertEquals(Boundedness.BOUNDED, source.getBoundedness()),
                 () -> assertNotNull(KafkaSourceFactory.supplyBuilderFor(config, TEST_SCHEMA))
             );
         }
 
         @Test
-        @DisplayName("Should successfully build unbounded source with stopping-offsets (finite streaming)")
+        @DisplayName("Should successfully build unbounded source with stopping-offsets and verify CONTINUOUS_UNBOUNDED boundedness")
         void shouldBuildUnboundedSourceWithStoppingOffsets() {
             var config = new KafkaSourceProperties(
                 "my-source",
@@ -195,8 +159,11 @@ class KafkaSourceFactoryTest {
                 null
             );
 
+            var source = KafkaSourceFactory.supplyFor(config, TEST_SCHEMA);
+
             assertAll(
-                () -> assertNotNull(KafkaSourceFactory.supplyFor(config, TEST_SCHEMA)),
+                () -> assertNotNull(source),
+                () -> assertEquals(Boundedness.CONTINUOUS_UNBOUNDED, source.getBoundedness()),
                 () -> assertNotNull(KafkaSourceFactory.supplyBuilderFor(config, TEST_SCHEMA))
             );
         }

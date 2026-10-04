@@ -2,7 +2,6 @@ package io.github.sekelenao.flinkboot.kafka.internal.validation.properties;
 
 import io.github.sekelenao.flinkboot.kafka.api.properties.sink.KafkaDeliveryGuarantee;
 import io.github.sekelenao.flinkboot.kafka.api.properties.sink.KafkaSinkProperties;
-import io.github.sekelenao.flinkboot.kafka.internal.properties.validation.KafkaSinkPropertiesValidator;
 import jakarta.validation.ConstraintValidatorContext;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;

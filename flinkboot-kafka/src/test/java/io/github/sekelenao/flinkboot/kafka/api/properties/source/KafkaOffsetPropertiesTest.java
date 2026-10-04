@@ -93,7 +93,7 @@ class KafkaOffsetPropertiesTest {
     class Validation {
 
         @ParameterizedTest
-        @EnumSource(value = KafkaOffsetInitializer.class, names = {"EARLIEST", "LATEST", "COMMITTED"})
+        @EnumSource(value = KafkaOffsetInitializer.class, names = {"TIMESTAMP", "OFFSETS"}, mode = EnumSource.Mode.EXCLUDE)
         @DisplayName("Should pass validation for standard strategies without timestamp and partitions")
         void shouldPassForStandardStrategies(KafkaOffsetInitializer strategy) {
             var props = new KafkaOffsetProperties(strategy, null, null);
@@ -160,7 +160,7 @@ class KafkaOffsetPropertiesTest {
         }
 
         @ParameterizedTest
-        @EnumSource(value = KafkaOffsetInitializer.class, names = {"EARLIEST", "LATEST", "COMMITTED", "OFFSETS"})
+        @EnumSource(value = KafkaOffsetInitializer.class, names = {"TIMESTAMP"}, mode = EnumSource.Mode.EXCLUDE)
         @DisplayName("Should fail validation when non-TIMESTAMP strategy has timestamp specified")
         void shouldFailWhenNonTimestampStrategyHasTimestamp(KafkaOffsetInitializer strategy) {
             var props = new KafkaOffsetProperties(
@@ -207,7 +207,7 @@ class KafkaOffsetPropertiesTest {
         }
 
         @ParameterizedTest
-        @EnumSource(value = KafkaOffsetInitializer.class, names = {"EARLIEST", "LATEST", "COMMITTED", "TIMESTAMP"})
+        @EnumSource(value = KafkaOffsetInitializer.class, names = {"OFFSETS"}, mode = EnumSource.Mode.EXCLUDE)
         @DisplayName("Should fail validation when non-OFFSETS strategy has partitions specified")
         void shouldFailWhenNonOffsetsStrategyHasPartitions(KafkaOffsetInitializer strategy) {
             var partition = new TopicPartitionOffsetProperties("my-topic", 0, 100L);
@@ -314,11 +314,11 @@ class KafkaOffsetPropertiesTest {
         @Test
         @DisplayName("Should verify inequality when fields differ")
         void shouldVerifyInequality() {
-            var a = new KafkaOffsetProperties(KafkaOffsetInitializer.EARLIEST, null, null);
-            var diffStrategy = new KafkaOffsetProperties(KafkaOffsetInitializer.LATEST, null, null);
-            var diffTimestamp = new KafkaOffsetProperties(KafkaOffsetInitializer.TIMESTAMP, 100L, null);
+            var a = new KafkaOffsetProperties(KafkaOffsetInitializer.TIMESTAMP, 100L, List.of(new TopicPartitionOffsetProperties("t", 0, 0L)));
+            var diffStrategy = new KafkaOffsetProperties(KafkaOffsetInitializer.OFFSETS, 100L, List.of(new TopicPartitionOffsetProperties("t", 0, 0L)));
+            var diffTimestamp = new KafkaOffsetProperties(KafkaOffsetInitializer.TIMESTAMP, 200L, List.of(new TopicPartitionOffsetProperties("t", 0, 0L)));
             var diffPartitions = new KafkaOffsetProperties(
-                KafkaOffsetInitializer.OFFSETS, null, List.of(new TopicPartitionOffsetProperties("t", 0, 0L)));
+                KafkaOffsetInitializer.TIMESTAMP, 100L, List.of(new TopicPartitionOffsetProperties("t", 1, 0L)));
 
             assertAll(
                 () -> assertNotEquals(a, diffStrategy),

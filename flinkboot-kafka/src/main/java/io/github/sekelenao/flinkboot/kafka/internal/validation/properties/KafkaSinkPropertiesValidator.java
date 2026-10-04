@@ -1,4 +1,4 @@
-package io.github.sekelenao.flinkboot.kafka.internal.properties.validation;
+package io.github.sekelenao.flinkboot.kafka.internal.validation.properties;
 
 import java.util.Objects;
 

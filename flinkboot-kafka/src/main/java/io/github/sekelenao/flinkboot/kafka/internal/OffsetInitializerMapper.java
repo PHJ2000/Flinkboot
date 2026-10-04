@@ -1,4 +1,4 @@
-package io.github.sekelenao.flinkboot.kafka.internal.properties;
+package io.github.sekelenao.flinkboot.kafka.internal;
 
 import io.github.sekelenao.flinkboot.kafka.api.properties.source.KafkaOffsetInitializer;
 import io.github.sekelenao.flinkboot.kafka.api.properties.source.KafkaOffsetProperties;

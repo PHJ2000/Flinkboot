@@ -1,4 +1,4 @@
-package io.github.sekelenao.flinkboot.kafka.internal.properties.validation;
+package io.github.sekelenao.flinkboot.kafka.internal.validation.properties;
 
 import io.github.sekelenao.flinkboot.core.internal.validation.properties.PropertiesValidator;
 import io.github.sekelenao.flinkboot.kafka.api.properties.source.KafkaBoundedness;

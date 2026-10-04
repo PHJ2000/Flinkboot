@@ -3,11 +3,12 @@ package io.github.sekelenao.flinkboot.kafka.internal.validation.properties;
 import io.github.sekelenao.flinkboot.kafka.api.properties.source.KafkaOffsetInitializer;
 import io.github.sekelenao.flinkboot.kafka.api.properties.source.KafkaOffsetProperties;
 import io.github.sekelenao.flinkboot.kafka.api.properties.source.TopicPartitionOffsetProperties;
-import io.github.sekelenao.flinkboot.kafka.internal.properties.validation.KafkaOffsetPropertiesValidator;
 import jakarta.validation.ConstraintValidatorContext;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.Answers;
 
 import java.util.List;
@@ -61,11 +62,12 @@ class KafkaOffsetPropertiesValidatorTest {
             assertTrue(KafkaOffsetPropertiesValidator.validate(props, context));
         }
 
-        @Test
-        @DisplayName("Should return true for valid EARLIEST strategy")
-        void shouldReturnTrueForValidEarliest() {
+        @ParameterizedTest
+        @EnumSource(value = KafkaOffsetInitializer.class, names = {"TIMESTAMP", "OFFSETS"}, mode = EnumSource.Mode.EXCLUDE)
+        @DisplayName("Should return true for valid standard strategy without timestamp and partitions")
+        void shouldReturnTrueForValidStandardStrategy(KafkaOffsetInitializer strategy) {
             var context = mock(ConstraintValidatorContext.class);
-            var props = new KafkaOffsetProperties(KafkaOffsetInitializer.EARLIEST, null, null);
+            var props = new KafkaOffsetProperties(strategy, null, null);
 
             assertTrue(KafkaOffsetPropertiesValidator.validate(props, context));
         }
@@ -107,21 +109,23 @@ class KafkaOffsetPropertiesValidatorTest {
             assertTrue(KafkaOffsetPropertiesValidator.validate(props, context));
         }
 
-        @Test
-        @DisplayName("Should return false when EARLIEST strategy has timestamp")
-        void shouldReturnFalseWhenEarliestHasTimestamp() {
+        @ParameterizedTest
+        @EnumSource(value = KafkaOffsetInitializer.class, names = {"TIMESTAMP", "OFFSETS"}, mode = EnumSource.Mode.EXCLUDE)
+        @DisplayName("Should return false when standard strategy has timestamp")
+        void shouldReturnFalseWhenStandardStrategyHasTimestamp(KafkaOffsetInitializer strategy) {
             var context = mock(ConstraintValidatorContext.class, Answers.RETURNS_DEEP_STUBS);
-            var props = new KafkaOffsetProperties(KafkaOffsetInitializer.EARLIEST, 1000L, null);
+            var props = new KafkaOffsetProperties(strategy, 1000L, null);
 
             assertFalse(KafkaOffsetPropertiesValidator.validate(props, context));
         }
 
-        @Test
-        @DisplayName("Should return false when EARLIEST strategy has partitions")
-        void shouldReturnFalseWhenEarliestHasPartitions() {
+        @ParameterizedTest
+        @EnumSource(value = KafkaOffsetInitializer.class, names = {"TIMESTAMP", "OFFSETS"}, mode = EnumSource.Mode.EXCLUDE)
+        @DisplayName("Should return false when standard strategy has partitions")
+        void shouldReturnFalseWhenStandardStrategyHasPartitions(KafkaOffsetInitializer strategy) {
             var context = mock(ConstraintValidatorContext.class, Answers.RETURNS_DEEP_STUBS);
             var partition = new TopicPartitionOffsetProperties("topic", 0, 10L);
-            var props = new KafkaOffsetProperties(KafkaOffsetInitializer.EARLIEST, null, List.of(partition));
+            var props = new KafkaOffsetProperties(strategy, null, List.of(partition));
 
             assertFalse(KafkaOffsetPropertiesValidator.validate(props, context));
         }

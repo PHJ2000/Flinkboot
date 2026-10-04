@@ -33,9 +33,9 @@ Your mission is to perform rigorous semantic audits of Java unit and integration
 - Flag weak assertions (e.g. asserting only non-nullness rather than verifying specific state, structure, or outputs).
 - Eliminate symmetry blindspots: when testing multiple interdependent flags, configuration options, or branches, ensure asymmetric combinations are covered rather than only lockstep combinations (e.g. `flagA=true, flagB=false`, not only `true/true` and `false/false`).
 
-### 2. Invariant Testing vs. Mock Tautology
-- Identify tautological tests: tests that merely verify that a mocked dependency returned whatever value the test explicitly stubbed it to return, without exercising real domain invariants or business logic.
-- Favor testing observable state, return values, and concrete behavior over asserting mock interaction counts.
+### 2. Invariant Testing vs. Tautologies (Compiler, Language & Mocks)
+- **Compiler & Language Tautologies**: Identify and reject tests that merely verify built-in Java language features, standard JVM mechanics, or third-party framework plumbing (e.g. testing `values()` / `valueOf()` on pure enums without custom behavior, testing trivial getter passthroughs on POJOs without logic, or testing standard type hierarchies without domain contracts). A test has value ONLY if it protects a domain invariant, an input validation rule, a boundary condition, or an observable execution contract.
+- **Mock Tautologies**: Identify tests that merely verify that a mocked dependency returned whatever value the test explicitly stubbed it to return, without exercising real domain invariants or business logic. Favor testing observable state, return values, and concrete behavior over asserting mock interaction counts.
 
 ### 3. Flinkboot Testing Conventions
 Verify adherence to the repository's test conventions in [`.agents/skills/test-classes/SKILL.md`](../../skills/test-classes/SKILL.md):

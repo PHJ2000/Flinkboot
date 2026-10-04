@@ -12,6 +12,18 @@ All notable user-facing changes to this project are documented in this file.
 
 ---
 
+## [0.6.0-1.20]
+
+### 🔴 Breaking Changes
+- **[flinkboot-kafka] Migration of `starting-offsets` to Nested Object**: In both YAML configuration and the Java API, `starting-offsets` is no longer a scalar value but a structured nested object requiring a `strategy` key (e.g. `starting-offsets: { strategy: EARLIEST }`). Flat configuration keys `starting-offsets-timestamp` and `starting-offsets-partition-offsets` have been removed in favor of `timestamp` and `partitions` within this nested block. In Java, flattened accessors on `KafkaSourceProperties` are replaced by `config.startingOffsets().strategy()`, `.timestamp()`, and `.partitions()`.
+
+### 🟢 Features & Enhancements
+- **[flinkboot-kafka] Dual-Mode Boundedness & Stopping Offsets Support (`boundedness` & `stopping-offsets`)**:
+  - Added `boundedness: BOUNDED | UNBOUNDED` to switch Kafka ingestion between continuous streaming and Flink's native batch execution mode.
+  - Added `stopping-offsets` configuration to automatically terminate ingestion upon reaching target offsets (specific timestamp, partition offsets, or current log end). Supports finite streaming when `boundedness: UNBOUNDED` and finite batch backfills when `boundedness: BOUNDED`.
+
+---
+
 ## [0.5.0-1.20]
 
 ### 🔴 Breaking Changes

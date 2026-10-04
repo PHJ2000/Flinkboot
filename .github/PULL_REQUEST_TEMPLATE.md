@@ -4,7 +4,7 @@
 -->
 
 ## Related Issue
-<!-- Link the issue resolved by this PR. (Mandatory) -->
+<!-- Mandatory: Specify "Closes #<issue_number>" below so the issue is linked and automatically closed upon merge. -->
 Closes #
 
 ## Description
@@ -16,7 +16,9 @@ Closes #
 - [ ] Generative AI was used (please specify tool and confirm compliance with .agents/skills/).
 
 ## Checklist
+- [ ] I am officially assigned to the related issue by a maintainer.
 - [ ] My PR title follows the `#<issue_number>: <title>` format.
+- [ ] My PR description includes `Closes #<issue_number>` to automatically link and close the issue upon merge.
 - [ ] `mvn clean test` passes locally with 0 errors and 0 failures.
 - [ ] My code adheres to the project standards in [CONTRIBUTING.md](CONTRIBUTING.md) and [.agents/skills/](.agents/skills/).
 - [ ] I have updated the documentation in `howto/` and `CHANGELOG.md` (if applicable).

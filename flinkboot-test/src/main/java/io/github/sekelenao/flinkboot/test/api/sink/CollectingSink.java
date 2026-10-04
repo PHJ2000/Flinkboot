@@ -12,6 +12,14 @@ import java.util.UUID;
 /**
  * A thread-safe sink for collecting elements in unit and integration tests.
  *
+ * <p>This sink uses a static in-memory registry in the JVM running its sink writers. It is
+ * intended for an in-process MiniCluster: values written by task managers in other JVMs,
+ * including a remote cluster, are not available through this sink's {@link #elements()} method.
+ *
+ * <p>The writer stores element references without copying. If Flink object reuse is enabled,
+ * later records may mutate values that were already collected. Disable object reuse when a test
+ * needs to assert collected values, or emit immutable or snapshotted values.
+ *
  * @param <T> the type of elements collected by this sink
  */
 public final class CollectingSink<T> implements Sink<T>, AutoCloseable {

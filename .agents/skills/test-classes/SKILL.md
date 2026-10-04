@@ -17,6 +17,7 @@ A test class should use JUnit 5 (Jupiter) and AssertJ / JUnit assertions.
 - Utility class constructors: For static utility classes with a private constructor throwing an exception (e.g. `AssertionError`), testing via reflection to verify it throws an `AssertionError` is sufficient. Do not assert the exception message string.
 - Test edge cases (e.g. null values, empty lists, boundary limits, invalid combinations).
 - Always import classes, interfaces, and static members (like `assertThat`, `assertThrows`, `assertAll`). Do not use fully qualified package/class names directly in test code.
+- **Anti-Compiler Tautologies & Zero-Value Tests**: Never write tests that merely verify the Java compiler, JVM semantics, or standard language mechanics (e.g. testing `values()` / `valueOf()` on pure enums without custom logic, testing trivial getter passthroughs on POJOs without validation, or asserting that an exception class extends `Exception`). Every test must answer the question: *"Can a realistic human mistake or production code mutation cause this test to fail?"*. If a test could only fail if the Java compiler or JDK specification itself were broken, it represents useless test debt and is strictly forbidden.
 
 ### Parameterized Tests & Pragmatic Consolidation (The Goldilocks Rule)
 - Consolidate repetitive test methods testing the exact same invariant with different inputs using `@ParameterizedTest` with `@ValueSource`, `@CsvSource`, or `@NullAndEmptySource` (e.g. invalid boundaries `-1`, `0`, or corrupted strings `"invalid"`, `"12.5"`, `"   "`).

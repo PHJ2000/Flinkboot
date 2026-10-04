@@ -8,6 +8,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @DisplayName("KebabCasePropertyNameMapper")
@@ -24,6 +25,18 @@ class KebabCasePropertyNameMapperTest {
         void shouldThrowWhenPropertyIsNull() {
             var exception = assertThrows(NullPointerException.class, () -> provider.getName(null));
             assertEquals("property must not be null", exception.getMessage());
+        }
+
+        @Test
+        @DisplayName("Should return empty string when property name is empty")
+        void shouldHandleEmptyPropertyName() {
+            assertEquals("", provider.getName(() -> ""));
+        }
+
+        @Test
+        @DisplayName("Should return null when property name is null")
+        void shouldHandleNullPropertyName() {
+            assertNull(provider.getName(() -> null));
         }
 
         @ParameterizedTest(name = "{0} -> {1}")

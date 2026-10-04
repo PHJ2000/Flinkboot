@@ -155,7 +155,15 @@ class ExecutionPropertiesTest {
             );
 
             Set<ConstraintViolation<ExecutionProperties>> violations = validator.validate(config);
-            assertEquals(2, violations.size());
+            assertAll(
+                () -> assertEquals(2, violations.size()),
+                () -> assertTrue(violations.stream().anyMatch(v ->
+                    v.getPropertyPath().toString().equals("buffer-timeout")
+                ), "Violation must target 'buffer-timeout'"),
+                () -> assertTrue(violations.stream().anyMatch(v ->
+                    v.getPropertyPath().toString().equals("auto-watermark-interval")
+                ), "Violation must target 'auto-watermark-interval'")
+            );
         }
 
         @Test

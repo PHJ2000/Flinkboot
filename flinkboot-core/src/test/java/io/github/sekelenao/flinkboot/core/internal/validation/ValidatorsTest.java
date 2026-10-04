@@ -1,6 +1,8 @@
 package io.github.sekelenao.flinkboot.core.internal.validation;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -20,6 +22,12 @@ class ValidatorsTest {
     public static class SampleConfig {
         @NotBlank
         public String sampleProperty = "";
+    }
+
+    public static class NestedConfig {
+        @Valid
+        @NotNull
+        public SampleConfig childConfig = new SampleConfig();
     }
 
     @Nested
@@ -52,6 +60,22 @@ class ValidatorsTest {
                 assertAll(
                     () -> assertEquals(1, violations.size()),
                     () -> assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().equals("sample-property")))
+                );
+            }
+        }
+
+        @Test
+        @DisplayName("Should resolve nested property paths to kebab-case")
+        void shouldResolveNestedPathsToKebabCase() {
+            try (var factory = Validators.factory()) {
+                var validator = factory.getValidator();
+                var violations = validator.validate(new NestedConfig());
+
+                assertAll(
+                    () -> assertEquals(1, violations.size()),
+                    () -> assertTrue(violations.stream().anyMatch(v ->
+                        v.getPropertyPath().toString().equals("child-config.sample-property")
+                    ), "Path must be resolved to child-config.sample-property")
                 );
             }
         }

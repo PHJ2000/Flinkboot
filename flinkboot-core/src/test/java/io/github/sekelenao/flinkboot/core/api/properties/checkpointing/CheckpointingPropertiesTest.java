@@ -178,8 +178,14 @@ class CheckpointingPropertiesTest {
                 true, Duration.ofSeconds(1), CheckpointingMode.EXACTLY_ONCE, Duration.ofSeconds(5), Duration.ofSeconds(-1), 1,
                 null, false, Duration.ZERO, null
             );
+            var violations = validator.validate(negativeMinPause);
 
-            assertEquals(1, validator.validate(negativeMinPause).size());
+            assertAll(
+                () -> assertEquals(1, violations.size()),
+                () -> assertTrue(violations.stream().anyMatch(v ->
+                    v.getPropertyPath().toString().equals("min-pause-between-checkpoints")
+                ), "Violation must target 'min-pause-between-checkpoints'")
+            );
         }
 
         @Test
@@ -189,8 +195,14 @@ class CheckpointingPropertiesTest {
                 true, Duration.ofSeconds(1), CheckpointingMode.EXACTLY_ONCE, Duration.ofSeconds(5), Duration.ZERO, 1,
                 null, false, Duration.ofSeconds(-5), null
             );
+            var violations = validator.validate(negativeTimeout);
 
-            assertEquals(1, validator.validate(negativeTimeout).size());
+            assertAll(
+                () -> assertEquals(1, violations.size()),
+                () -> assertTrue(violations.stream().anyMatch(v ->
+                    v.getPropertyPath().toString().equals("aligned-checkpoint-timeout")
+                ), "Violation must target 'aligned-checkpoint-timeout'")
+            );
         }
 
         @ParameterizedTest

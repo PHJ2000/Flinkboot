@@ -1,7 +1,8 @@
 package io.github.sekelenao.flinkboot.kafka.api.source;
 
+import io.github.sekelenao.flinkboot.kafka.api.properties.source.KafkaBoundedness;
 import io.github.sekelenao.flinkboot.kafka.api.properties.source.KafkaSourceProperties;
-import io.github.sekelenao.flinkboot.kafka.internal.OffsetInitializerMapper;
+import io.github.sekelenao.flinkboot.kafka.internal.properties.OffsetInitializerMapper;
 import org.apache.flink.connector.kafka.source.KafkaSource;
 import org.apache.flink.connector.kafka.source.KafkaSourceBuilder;
 import org.apache.flink.connector.kafka.source.reader.deserializer.KafkaRecordDeserializationSchema;
@@ -47,7 +48,7 @@ public final class KafkaSourceFactory {
 
         var additionalProperties = new Properties();
         additionalProperties.putAll(config.properties());
-        var startingOffsets = OffsetInitializerMapper.map(config);
+        var startingOffsets = OffsetInitializerMapper.map(config.startingOffsets());
 
         var builder = KafkaSource.<T>builder()
             .setBootstrapServers(String.join(",", config.bootstrapServers()))
@@ -55,6 +56,15 @@ public final class KafkaSourceFactory {
             .setStartingOffsets(startingOffsets)
             .setProperties(additionalProperties)
             .setDeserializer(schema);
+
+        config.stoppingOffsets().ifPresent(stopping -> {
+            var stoppingOffsets = OffsetInitializerMapper.map(stopping);
+            if (config.boundedness().orElse(KafkaBoundedness.UNBOUNDED) == KafkaBoundedness.BOUNDED) {
+                builder.setBounded(stoppingOffsets);
+            } else {
+                builder.setUnbounded(stoppingOffsets);
+            }
+        });
 
         if (!config.topics().isEmpty()) {
             builder.setTopics(config.topics());

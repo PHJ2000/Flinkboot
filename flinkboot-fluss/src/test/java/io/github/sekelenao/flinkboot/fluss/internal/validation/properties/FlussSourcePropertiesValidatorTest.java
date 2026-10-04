@@ -9,6 +9,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static jakarta.validation.Validation.buildDefaultValidatorFactory;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -20,6 +21,7 @@ import static org.mockito.Mockito.mock;
 import io.github.sekelenao.flinkboot.fluss.api.properties.source.FlussSourceProperties;
 import io.github.sekelenao.flinkboot.fluss.api.properties.source.FlussStartupMode;
 import jakarta.validation.ConstraintValidatorContext;
+
 
 @DisplayName("FlussSourcePropertiesValidator")
 class FlussSourcePropertiesValidatorTest {
@@ -144,6 +146,14 @@ class FlussSourcePropertiesValidatorTest {
             );
 
             assertFalse(FlussSourcePropertiesValidator.validate(props, context));
+
+            try (var factory = buildDefaultValidatorFactory()) {
+                var violations = factory.getValidator().validate(props);
+                assertEquals(1, violations.size());
+                assertTrue(violations.stream().anyMatch(violation ->
+                    violation.getPropertyPath().toString().equals("startup-timestamp")
+                ));
+            }
         }
 
         @ParameterizedTest

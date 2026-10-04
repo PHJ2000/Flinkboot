@@ -2,7 +2,7 @@ package io.github.sekelenao.flinkboot.fluss.api.properties.source;
 
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
-import jakarta.validation.Validation;
+import io.github.sekelenao.flinkboot.core.internal.validation.Validators;
 import jakarta.validation.Validator;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -33,7 +33,7 @@ class FlussSourcePropertiesTest {
 
     private static final Validator validator;
     static {
-        try (var factory = Validation.buildDefaultValidatorFactory()) {
+        try (var factory = Validators.factory()) {
             validator = factory.getValidator();
         }
     }
@@ -257,7 +257,7 @@ class FlussSourcePropertiesTest {
                 () -> assertFalse(violations.isEmpty()),
                 () -> assertTrue(
                     violations.stream()
-                        .anyMatch(v -> v.getPropertyPath().toString().startsWith("bootstrapServers"))
+                        .anyMatch(v -> v.getPropertyPath().toString().startsWith("bootstrap-servers"))
                 )
             );
         }
@@ -281,7 +281,7 @@ class FlussSourcePropertiesTest {
                 () -> assertFalse(violations.isEmpty()),
                 () -> assertTrue(
                     violations.stream()
-                        .anyMatch(v -> v.getPropertyPath().toString().startsWith("bootstrapServers"))
+                        .anyMatch(v -> v.getPropertyPath().toString().startsWith("bootstrap-servers"))
                 )
             );
         }

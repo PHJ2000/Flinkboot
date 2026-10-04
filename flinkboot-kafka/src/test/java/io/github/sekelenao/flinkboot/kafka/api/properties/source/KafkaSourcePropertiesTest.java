@@ -101,6 +101,24 @@ class KafkaSourcePropertiesTest {
         }
 
         @Test
+        @DisplayName("Should return empty list when bootstrapServers is null")
+        void shouldReturnEmptyListWhenBootstrapServersIsNull() {
+            var config = new KafkaSourceProperties(
+                "my-source",
+                null,
+                "my-group",
+                List.of("topic-a"),
+                null,
+                DEFAULT_STARTING_OFFSETS,
+                null,
+                null,
+                null
+            );
+
+            assertTrue(config.bootstrapServers().isEmpty());
+        }
+
+        @Test
         @DisplayName("Should return unmodifiable defensive copies for collections")
         void shouldReturnUnmodifiableCollections() {
             var servers = new ArrayList<>(List.of("localhost:9092"));

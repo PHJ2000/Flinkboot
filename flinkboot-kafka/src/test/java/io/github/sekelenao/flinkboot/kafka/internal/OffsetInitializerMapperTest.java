@@ -47,11 +47,11 @@ class OffsetInitializerMapperTest {
         var offsets = new KafkaOffsetProperties(KafkaOffsetInitializer.OFFSETS, null, List.of(partition));
 
         assertAll(
-            () -> assertNotNull(OffsetInitializerMapper.map(earliest)),
-            () -> assertNotNull(OffsetInitializerMapper.map(latest)),
-            () -> assertNotNull(OffsetInitializerMapper.map(committed)),
-            () -> assertNotNull(OffsetInitializerMapper.map(committedEarliest)),
-            () -> assertNotNull(OffsetInitializerMapper.map(committedLatest)),
+            () -> assertEquals(KafkaOffsetInitializer.EARLIEST.offsetsInitializer().orElseThrow(), OffsetInitializerMapper.map(earliest)),
+            () -> assertEquals(KafkaOffsetInitializer.LATEST.offsetsInitializer().orElseThrow(), OffsetInitializerMapper.map(latest)),
+            () -> assertEquals(KafkaOffsetInitializer.COMMITTED.offsetsInitializer().orElseThrow(), OffsetInitializerMapper.map(committed)),
+            () -> assertEquals(KafkaOffsetInitializer.COMMITTED_EARLIEST.offsetsInitializer().orElseThrow(), OffsetInitializerMapper.map(committedEarliest)),
+            () -> assertEquals(KafkaOffsetInitializer.COMMITTED_LATEST.offsetsInitializer().orElseThrow(), OffsetInitializerMapper.map(committedLatest)),
             () -> assertNotNull(OffsetInitializerMapper.map(timestamp)),
             () -> assertNotNull(OffsetInitializerMapper.map(offsets))
         );

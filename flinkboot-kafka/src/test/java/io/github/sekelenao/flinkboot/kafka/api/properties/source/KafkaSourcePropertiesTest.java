@@ -16,7 +16,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import static jakarta.validation.Validation.buildDefaultValidatorFactory;
+import io.github.sekelenao.flinkboot.core.internal.validation.Validators;
+
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -30,7 +31,7 @@ class KafkaSourcePropertiesTest {
     private static final Validator validator;
 
     static {
-        try (var factory = buildDefaultValidatorFactory()) {
+        try (var factory = Validators.factory()) {
             validator = factory.getValidator();
         }
     }
@@ -236,8 +237,8 @@ class KafkaSourcePropertiesTest {
             );
 
             assertAll(
-                () -> assertTrue(validator.validate(configNull).stream().anyMatch(v -> v.getPropertyPath().toString().equals("bootstrapServers"))),
-                () -> assertTrue(validator.validate(configEmpty).stream().anyMatch(v -> v.getPropertyPath().toString().equals("bootstrapServers")))
+                () -> assertTrue(validator.validate(configNull).stream().anyMatch(v -> v.getPropertyPath().toString().equals("bootstrap-servers"))),
+                () -> assertTrue(validator.validate(configEmpty).stream().anyMatch(v -> v.getPropertyPath().toString().equals("bootstrap-servers")))
             );
         }
 
@@ -261,7 +262,7 @@ class KafkaSourcePropertiesTest {
             var violations = validator.validate(config);
             assertAll(
                 () -> assertEquals(1, violations.size()),
-                () -> assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().equals("groupId")))
+                () -> assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().equals("group-id")))
             );
         }
 
@@ -284,7 +285,7 @@ class KafkaSourcePropertiesTest {
 
             assertAll(
                 () -> assertFalse(violations.isEmpty()),
-                () -> assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().equals("topicPattern")))
+                () -> assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().equals("topic-pattern")))
             );
         }
 
@@ -354,7 +355,7 @@ class KafkaSourcePropertiesTest {
             var violations = validator.validate(config);
             assertAll(
                 () -> assertEquals(1, violations.size()),
-                () -> assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().equals("startingOffsets")))
+                () -> assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().equals("starting-offsets")))
             );
         }
 
@@ -377,7 +378,7 @@ class KafkaSourcePropertiesTest {
             var violations = validator.validate(config);
             assertAll(
                 () -> assertFalse(violations.isEmpty()),
-                () -> assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().startsWith("startingOffsets")))
+                () -> assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().startsWith("starting-offsets")))
             );
         }
 
@@ -424,7 +425,7 @@ class KafkaSourcePropertiesTest {
             var violations = validator.validate(config);
             assertAll(
                 () -> assertFalse(violations.isEmpty()),
-                () -> assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().startsWith("stoppingOffsets")))
+                () -> assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().startsWith("stopping-offsets")))
             );
         }
     }

@@ -2,7 +2,7 @@ package io.github.sekelenao.flinkboot.core.api.properties.checkpointing;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import jakarta.validation.Validation;
+import io.github.sekelenao.flinkboot.core.internal.validation.Validators;
 import jakarta.validation.Validator;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -21,7 +21,13 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @DisplayName("CheckpointingProperties Tests")
 class CheckpointingPropertiesTest {
 
-    private final Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
+    private static final Validator validator;
+
+    static {
+        try (var factory = Validators.factory()) {
+            validator = factory.getValidator();
+        }
+    }
 
     @Nested
     @DisplayName("Getters Tests")
@@ -200,7 +206,7 @@ class CheckpointingPropertiesTest {
             assertAll(
                 () -> assertEquals(1, violations.size()),
                 () -> assertTrue(violations.stream().anyMatch(v ->
-                    v.getPropertyPath().toString().equals("storageUri")
+                    v.getPropertyPath().toString().equals("storage-uri")
                         && v.getMessage().equals("must not be blank")
                 ))
             );
